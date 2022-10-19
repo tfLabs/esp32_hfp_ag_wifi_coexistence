@@ -58,11 +58,11 @@ def read_audio_from_socket():
     sock.connect(("microphone.local", 9090))
     sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     while buffer_audio:
-        data = sock.recv(4096)
+        data = sock.recv(1024)
         if data == b"":
             raise RuntimeError("Lost connection")
         buffer.append(data)
-        if len(buffer) > 50 and buffering:
+        if len(buffer) > 25 and buffering:
             print("Finished buffering")
             buffering = False
 
