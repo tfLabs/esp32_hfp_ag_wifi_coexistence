@@ -254,7 +254,7 @@ static void bt_app_send_data_task(void *arg)
             bt_app_hf_create_audio_data(buf, frame_data_num);
             BaseType_t done = xRingbufferSend(s_m_rb, buf, frame_data_num, 0);
             if (!done) {
-                ESP_LOGE(BT_HF_TAG, "rb send fail\n");
+                ESP_LOGE(BT_HF_TAG, "rb send fail");
             }
             osi_free(buf);
             vRingbufferGetInfo(s_m_rb, NULL, NULL, NULL, NULL, &item_size);
@@ -268,13 +268,15 @@ static void bt_app_send_data_task(void *arg)
                     esp_hf_outgoing_data_ready();
                 }
             }
+        } else {
+            ESP_LOGE(BT_HF_TAG, "%s xSemaphoreTake failed", __func__);
         }
     }
 }
 void bt_app_send_data(void)
 {
     s_send_data_Semaphore = xSemaphoreCreateBinary();
-    xTaskCreate(bt_app_send_data_task, "BtAppSendDataTask", 2048, NULL, configMAX_PRIORITIES - 3, &s_bt_app_send_data_task_handler);
+    xTaskCreate(bt_app_send_data_task, "BtAppSendDataTask", 2048, NULL, configMAX_PRIORITIES, &s_bt_app_send_data_task_handler);
     s_m_rb = xRingbufferCreate(ESP_HFP_RINGBUF_SIZE, RINGBUF_TYPE_BYTEBUF);
     const esp_timer_create_args_t c_periodic_timer_args = {
             .callback = &bt_app_send_data_timer_cb,
