@@ -4,4 +4,12 @@ idf_component_register(SRCS "app_hf_msg_prs.c"
                             "bt_app_hf.c"
                             "gpio_pcm_config.c"
                             "main.c"
-                    INCLUDE_DIRS ".")
+                            "cpp_main.cpp"
+                            "Application.cpp"
+                            "audio_input/I2SSampler.cpp"
+                            "config.cpp"
+                            "transports/TCPSocketTransport.cpp"
+                            "audio_input/ADCSampler.cpp"
+                    INCLUDE_DIRS "."
+                                 "audio_input"
+                                 "transports")

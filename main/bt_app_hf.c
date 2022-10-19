@@ -28,6 +28,8 @@
 #include "bt_app_hf.h"
 #include "osi/allocator.h"
 
+#include "math.h"
+
 const char *c_hf_evt_str[] = {
     "CONNECTION_STATE_EVT",              /*!< SERVICE LEVEL CONNECTION STATE CONTROL */
     "AUDIO_STATE_EVT",                   /*!< AUDIO CONNECTION STATE CONTROL */
@@ -107,19 +109,20 @@ const char *c_codec_mode_str[] = {
 #if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
 #define TABLE_SIZE         100
 #define TABLE_SIZE_BYTE    200
+
 // Produce a sine audio
-static const int16_t sine_int16[TABLE_SIZE] = {
-     0,    2057,    4107,    6140,    8149,   10126,   12062,   13952,   15786,   17557,
- 19260,   20886,   22431,   23886,   25247,   26509,   27666,   28714,   29648,   30466,
- 31163,   31738,   32187,   32509,   32702,   32767,   32702,   32509,   32187,   31738,
- 31163,   30466,   29648,   28714,   27666,   26509,   25247,   23886,   22431,   20886,
- 19260,   17557,   15786,   13952,   12062,   10126,    8149,    6140,    4107,    2057,
-     0,   -2057,   -4107,   -6140,   -8149,  -10126,  -12062,  -13952,  -15786,  -17557,
--19260,  -20886,  -22431,  -23886,  -25247,  -26509,  -27666,  -28714,  -29648,  -30466,
--31163,  -31738,  -32187,  -32509,  -32702,  -32767,  -32702,  -32509,  -32187,  -31738,
--31163,  -30466,  -29648,  -28714,  -27666,  -26509,  -25247,  -23886,  -22431,  -20886,
--19260,  -17557,  -15786,  -13952,  -12062,  -10126,   -8149,   -6140,   -4107,   -2057,
-};
+// static const int16_t sine_int16[TABLE_SIZE] = {
+//      0,    2057,    4107,    6140,    8149,   10126,   12062,   13952,   15786,   17557,
+//  19260,   20886,   22431,   23886,   25247,   26509,   27666,   28714,   29648,   30466,
+//  31163,   31738,   32187,   32509,   32702,   32767,   32702,   32509,   32187,   31738,
+//  31163,   30466,   29648,   28714,   27666,   26509,   25247,   23886,   22431,   20886,
+//  19260,   17557,   15786,   13952,   12062,   10126,    8149,    6140,    4107,    2057,
+//      0,   -2057,   -4107,   -6140,   -8149,  -10126,  -12062,  -13952,  -15786,  -17557,
+// -19260,  -20886,  -22431,  -23886,  -25247,  -26509,  -27666,  -28714,  -29648,  -30466,
+// -31163,  -31738,  -32187,  -32509,  -32702,  -32767,  -32702,  -32509,  -32187,  -31738,
+// -31163,  -30466,  -29648,  -28714,  -27666,  -26509,  -25247,  -23886,  -22431,  -20886,
+// -19260,  -17557,  -15786,  -13952,  -12062,  -10126,   -8149,   -6140,   -4107,   -2057,
+// };
 
 #define ESP_HFP_RINGBUF_SIZE 3600
 
@@ -178,16 +181,29 @@ static void bt_app_hf_incoming_cb(const uint8_t *buf, uint32_t sz)
     }
 }
 
+float freq2 = 1000;
+float sps2 = 16000;
+float cur2 = 0;
+int16_t amp2 = 4096;
+
 static uint32_t bt_app_hf_create_audio_data(uint8_t *p_buf, uint32_t sz)
 {
-    static int index = 0;
-    uint8_t *data = (uint8_t *)sine_int16;
+    // static int index = 0;
+    // uint8_t *data = (uint8_t *)sine_int16;
 
-    for (uint32_t i = 0; i < sz; i++) {
-        p_buf[i] = data[index++];
-        if (index >= TABLE_SIZE_BYTE) {
-            index -= TABLE_SIZE_BYTE;
-        }
+    // for (uint32_t i = 0; i < sz; i++) {
+    //     p_buf[i] = data[index++];
+    //     if (index >= TABLE_SIZE_BYTE) {
+    //         index -= TABLE_SIZE_BYTE;
+    //     }
+    // }
+
+    uint16_t *samples = (uint16_t *)p_buf;
+    int samples_read = sz / sizeof(uint16_t);
+    for (int i = 0; i < samples_read; i++)
+    {
+        samples[i] = (uint16_t)(amp2 * sin(2 * M_PI * cur2));
+        cur2 += freq2 / sps2;
     }
     return sz;
 }

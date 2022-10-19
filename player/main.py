@@ -91,7 +91,8 @@ def main():
         stream = pyaudio.Stream(
             p,
             output=True,
-            rate=44100,
+            # rate=44100,
+            rate=16000,
             channels=1,
             format=pyaudio.paInt16,
             output_device_index=output_device_idx,

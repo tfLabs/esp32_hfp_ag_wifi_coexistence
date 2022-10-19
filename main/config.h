@@ -4,18 +4,19 @@
 #include <driver/i2s.h>
 
 // network config
-#define WIFI_SSID <<SSID>>
-#define WIFI_PASSWORD <<PSWD>>
+#define WIFI_SSID "esp_wifi_ap"
+#define WIFI_PASSWORD "espwifiap"
 #define MDNS_DOMAIN "microphone"
 
 // save to SPIFFS instead of SD Card?
 // #define USE_SPIFFS 1
 
 // sample rate for the system
-#define SAMPLE_RATE 44100
+// #define SAMPLE_RATE 44100
+#define SAMPLE_RATE 16000
 
 // are you using an I2S microphone - comment this out if you want to use an analog mic and ADC input
-#define USE_I2S_MIC_INPUT
+// #define USE_I2S_MIC_INPUT
 
 // I2S Microphone Settings
 // Which channel is the I2S microphone on? I2S_CHANNEL_FMT_ONLY_LEFT or I2S_CHANNEL_FMT_ONLY_RIGHT

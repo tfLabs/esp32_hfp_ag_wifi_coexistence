@@ -27,6 +27,8 @@
 #include "esp_console.h"
 #include "app_hf_msg_set.h"
 
+#include "cpp_main.h"
+
 #define BT_HF_AG_TAG            "HF_AG_DEMO_MAIN"
 
 /* event for handler "hf_ag_hdl_stack_up */
@@ -140,4 +142,6 @@ void app_main(void)
 
     // start console REPL
     ESP_ERROR_CHECK(esp_console_start_repl(repl));
+
+    cpp_main();
 }
