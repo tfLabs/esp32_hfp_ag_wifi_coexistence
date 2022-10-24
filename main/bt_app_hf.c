@@ -504,7 +504,7 @@ void bt_app_hf_cb(esp_hf_cb_event_t event, esp_hf_cb_param_t *param)
 static void bt_app_cona_command_publish_task(void *arg)
 {
     for (;;) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
         if ((s_connection_state == ESP_HF_CONNECTION_STATE_SLC_CONNECTED)
             && (s_audio_code == ESP_HF_AUDIO_STATE_DISCONNECTED)) {
             esp_bt_hf_connect_audio(hf_peer_addr);
