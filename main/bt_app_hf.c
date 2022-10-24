@@ -148,9 +148,12 @@ static uint64_t s_last_enter_time, s_now_enter_time;
 static uint64_t s_us_duration;
 static xSemaphoreHandle s_send_data_Semaphore = NULL;
 static xTaskHandle s_bt_app_send_data_task_handler = NULL;
-static esp_hf_audio_state_t s_audio_code;
+static xTaskHandle s_bt_app_cona_command_publish_task_handler = NULL;
+static esp_hf_audio_state_t s_audio_code = ESP_HF_AUDIO_STATE_DISCONNECTED;
+static esp_hf_connection_state_t s_connection_state;
 
 static void print_speed(void);
+static void bt_app_cona_command_publish_task(void *arg);
 
 static uint32_t bt_app_hf_outgoing_cb(uint8_t *p_buf, uint32_t sz)
 {
@@ -288,6 +291,11 @@ void bt_app_send_data(void)
     return;
 }
 
+void bt_app_polling_connection_status(void)
+{
+    xTaskCreate(bt_app_cona_command_publish_task, "BtAppSendDataTask2", 2048, NULL, 1, &s_bt_app_cona_command_publish_task_handler);
+}
+
 void bt_app_send_data_shut_down(void)
 {
     if (s_bt_app_send_data_task_handler) {
@@ -325,6 +333,10 @@ void bt_app_hf_cb(esp_hf_cb_event_t event, esp_hf_cb_param_t *param)
                     param->conn_stat.peer_feat,
                     param->conn_stat.chld_feat);
             memcpy(hf_peer_addr, param->conn_stat.remote_bda, ESP_BD_ADDR_LEN);
+            s_connection_state = param->conn_stat.state;
+            if (param->conn_stat.state == ESP_HF_CONNECTION_STATE_SLC_CONNECTED) {
+                bt_app_polling_connection_status();
+            }
             break;
         }
 
@@ -487,4 +499,18 @@ void bt_app_hf_cb(esp_hf_cb_event_t event, esp_hf_cb_param_t *param)
             break;
 
     }
+}
+
+static void bt_app_cona_command_publish_task(void *arg)
+{
+    for (;;) {
+        if ((s_connection_state == ESP_HF_CONNECTION_STATE_SLC_CONNECTED)
+            && (s_audio_code == ESP_HF_AUDIO_STATE_DISCONNECTED)) {
+            ESP_LOGI(BT_HF_TAG, "Connect Audio 2");
+            esp_bt_hf_connect_audio(hf_peer_addr);
+            break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+    vTaskDelete(NULL);
 }
