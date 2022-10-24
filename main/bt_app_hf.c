@@ -503,15 +503,13 @@ void bt_app_hf_cb(esp_hf_cb_event_t event, esp_hf_cb_param_t *param)
 
 static void bt_app_cona_command_publish_task(void *arg)
 {
-    vTaskDelay(pdMS_TO_TICKS(1000));
     for (;;) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
         if ((s_connection_state == ESP_HF_CONNECTION_STATE_SLC_CONNECTED)
             && (s_audio_code == ESP_HF_AUDIO_STATE_DISCONNECTED)) {
-            ESP_LOGI(BT_HF_TAG, "Connect Audio 2");
             esp_bt_hf_connect_audio(hf_peer_addr);
             break;
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));
     }
     vTaskDelete(NULL);
 }
